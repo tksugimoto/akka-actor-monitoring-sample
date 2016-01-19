@@ -1,3 +1,4 @@
 target
 /.idea
 /akka-diagnostics/
+/project/typesafe.properties
