@@ -13,9 +13,9 @@ class PingActor extends Actor with ActorLogging {
 	    log.info("In PingActor - starting ping-pong")
   	  pongActor ! PingMessage("ping")	
   	case PongActor.PongMessage(text) =>
-  	  log.info("In PingActor - received message: {}", text)
+  	  //log.info("In PingActor - received message: {}", text)
   	  counter += 1
-  	  if (counter == 3000) {
+  	  if (counter == 300000) {
   	    context.system.shutdown()
   	  } else if (counter % 5 == 0) {
   	    sender() ! PingMessage("ping-1")
