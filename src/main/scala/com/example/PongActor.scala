@@ -5,6 +5,10 @@ import akka.actor.{Actor, ActorLogging, Props}
 class PongActor extends Actor with ActorLogging {
   import PongActor._
 
+  override def preStart(): Unit = {
+    log.info("Created PongActor!!")
+  }
+
   def receive = {
   	case PingActor.PingMessage(text) => 
   	  //log.info("In PongActor - received message: {}", text)
