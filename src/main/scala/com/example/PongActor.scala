@@ -6,7 +6,7 @@ class PongActor extends Actor with ActorLogging {
   import PongActor._
 
   override def preStart(): Unit = {
-    log.info("Created PongActor!!")
+    log.info("Created PongActor!!" + self.path)
   }
 
   def receive = {
@@ -14,7 +14,7 @@ class PongActor extends Actor with ActorLogging {
   	  //log.info("In PongActor - received message: {}", text)
       Thread.sleep(100)
   	  sender() ! PongMessage("pong")
-  }	
+  }
 }
 
 object PongActor {
