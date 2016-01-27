@@ -7,30 +7,34 @@ class PingActor extends Actor with ActorLogging {
   
   var counter = 0
 	val pongRouter = context.actorOf(PongRouter.props, "pongRouter")
+	
 
   def receive = {
   	case Initialize => 
 	    log.info("In PingActor - starting ping-pong")
-	    pongRouter ! PingMessage("ping")
-  	case PongActor.PongMessage(text) =>
-  	  //log.info("In PingActor - received message: {}", text)
-  	  counter += 1
-			if (counter % 100 == 0) {
-				pongRouter ! PongRouter.Create
+			import scala.concurrent.duration._
+			
+			context.system.scheduler.schedule(initialDelay = 0 seconds, interval = 20 milliseconds) {
+				counter += 1
+				pongRouter ! PingMessage("ping", counter)
+			} (context.system.dispatcher)
+			
+			// 60秒後から5秒おきに10回スケーリング
+			(1 to 10) foreach { i =>
+				context.system.scheduler.scheduleOnce(delay = 55 + 5 * i seconds) {
+					pongRouter ! PongRouter.Create
+				} (context.system.dispatcher)
 			}
-  	  if (counter == 300000) {
-  	    context.system.shutdown()
-			} else if (counter % 5 == 0) {
-				pongRouter ! PingMessage(s"ping-${counter}-1")
-				pongRouter ! PingMessage(s"ping-${counter}-2")
-  	  } else {
-				pongRouter ! PingMessage(s"ping-${counter}")
-  	  }
+		case PongActor.PongMessage(text, index) =>
+			log.info(s"In PingActor - received from ${sender().path.toString.split("/").last}: ${text}-${index}")
+			// 作られすぎる
+			// if (counter - index > 50) pongRouter ! PongRouter.Create
   }	
 }
 
 object PingActor {
   val props = Props[PingActor]
-  case object Initialize
-  case class PingMessage(text: String)
+	case object Initialize
+	case object Help
+  case class PingMessage(text: String, index: Int)
 }

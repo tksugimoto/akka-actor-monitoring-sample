@@ -10,14 +10,15 @@ class PongActor extends Actor with ActorLogging {
   }
 
   def receive = {
-  	case PingActor.PingMessage(text) => 
-  	  log.info("In PongActor - received message: {}", text)
+  	case PingActor.PingMessage(text, index) => 
+  	  // log.info("In PongActor - received message: {}", text)
       Thread.sleep(100)
-  	  sender() ! PongMessage("pong")
+  	  sender() ! PongMessage("pong", index)
+      
   }
 }
 
 object PongActor {
   val props = Props[PongActor]
-  case class PongMessage(text: String)
+  case class PongMessage(text: String, index: Int)
 }
