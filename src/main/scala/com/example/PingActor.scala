@@ -21,10 +21,10 @@ class PingActor extends Actor with ActorLogging {
   	  if (counter == 300000) {
   	    context.system.shutdown()
 			} else if (counter % 5 == 0) {
-  	    sender() ! PingMessage("ping-1")
-  	    sender() ! PingMessage("ping-2")
+				pongRouter ! PingMessage(s"ping-${counter}-1")
+				pongRouter ! PingMessage(s"ping-${counter}-2")
   	  } else {
-  	    sender() ! PingMessage("ping")
+				pongRouter ! PingMessage(s"ping-${counter}")
   	  }
   }	
 }
