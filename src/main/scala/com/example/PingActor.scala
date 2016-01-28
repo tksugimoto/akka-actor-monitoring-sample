@@ -1,6 +1,6 @@
 package com.example
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Cancellable, Actor, ActorLogging, Props}
 import akka.routing.FromConfig
 
 class PingActor extends Actor with ActorLogging {
@@ -14,10 +14,18 @@ class PingActor extends Actor with ActorLogging {
   	case Initialize => 
 	    log.info("In PingActor - starting ping-pong")
 			import scala.concurrent.duration._
-			
+
 			context.system.scheduler.schedule(initialDelay = 0 seconds, interval = 20 milliseconds) {
 				counter += 1
 				pongRouter ! PingMessage("ping", counter)
+			} (context.system.dispatcher)
+			
+			val cancel: Cancellable = context.system.scheduler.schedule(initialDelay = 30 seconds, interval = 30 milliseconds) {
+				counter += 1
+				pongRouter ! PingMessage("ping", counter)
+			} (context.system.dispatcher)
+			context.system.scheduler.scheduleOnce(delay = 90 seconds) {
+				cancel.cancel()
 			} (context.system.dispatcher)
 		case PongActor.PongMessage(text, index) =>
 			// log.info(s"In PingActor - received from ${sender().path.toString.split("/").last}: ${text}-${index}")
