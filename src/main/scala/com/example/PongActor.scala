@@ -8,6 +8,10 @@ class PongActor extends Actor with ActorLogging {
   override def preStart(): Unit = {
     log.info("Created PongActor!!" + self.path)
   }
+  
+  override def postStop() = {
+    log.info("-- Stopped PongActor!!" + self.path)
+  }
 
   def receive = {
   	case PingActor.PingMessage(text, index) => 

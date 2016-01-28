@@ -1,12 +1,13 @@
 package com.example
 
 import akka.actor.{Actor, ActorLogging, Props}
+import akka.routing.FromConfig
 
 class PingActor extends Actor with ActorLogging {
   import PingActor._
   
   var counter = 0
-	val pongRouter = context.actorOf(PongRouter.props, "pongRouter")
+	val pongRouter = context.actorOf(FromConfig.props(PongActor.props), "pongActor")
 	
 
   def receive = {
@@ -18,17 +19,8 @@ class PingActor extends Actor with ActorLogging {
 				counter += 1
 				pongRouter ! PingMessage("ping", counter)
 			} (context.system.dispatcher)
-			
-			// 60秒後から5秒おきに10回スケーリング
-			(1 to 10) foreach { i =>
-				context.system.scheduler.scheduleOnce(delay = 55 + 5 * i seconds) {
-					pongRouter ! PongRouter.Create
-				} (context.system.dispatcher)
-			}
 		case PongActor.PongMessage(text, index) =>
-			log.info(s"In PingActor - received from ${sender().path.toString.split("/").last}: ${text}-${index}")
-			// 作られすぎる
-			// if (counter - index > 50) pongRouter ! PongRouter.Create
+			// log.info(s"In PingActor - received from ${sender().path.toString.split("/").last}: ${text}-${index}")
   }	
 }
 
